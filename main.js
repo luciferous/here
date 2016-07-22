@@ -1,43 +1,47 @@
-function getLocation() {
-  if ("geolocation" in navigator) {
-    return new Promise(function(ok, fail) {
-      navigator.geolocation.getCurrentPosition(ok, fail);
-    });
-  } else {
-    return Promise.reject(new Error("No geolocation"));
-  }
+function watchPosition(options) {
+  if (!navigator.geolocation) throw new Error("Geolocation not supported.");
+  const q = asyncqueue();
+  navigator.geolocation.watchPosition(q.offer, q.fail, options);
+  return q;
 }
 
 function ll(position) {
   return [position.coords.longitude, position.coords.latitude];
 }
 
-function displayPerson(map, lnglat, url) {
+function newPerson(url) {
   var el = document.createElement("div");
   el.className = "person";
   el.style.backgroundImage = "url(" + url + ")";
-  console.info(el);
-
-  // add marker to map
-  new mapboxgl.Marker(el)
-    .setLngLat(lnglat)
-    .addTo(map);
+  return new mapboxgl.Marker(el);
 }
 
 function main(container) {
-  getLocation().then(function(position) {
+  mapboxgl.accessToken = "pk.eyJ1IjoibmV1bWFuIiwiYSI6ImNpcXhkaTAwNDAxZW9ma204cGp2d2RwZGIifQ.P0eiTzHLtsKjMm7KYV3ung";
+  const positions = watchPosition({ enableHighAccuracy: true });
+  positions.poll().then(function(position) {
     const center = ll(position);
-    mapboxgl.accessToken = "pk.eyJ1IjoibmV1bWFuIiwiYSI6ImNpcXhkaTAwNDAxZW9ma204cGp2d2RwZGIifQ.P0eiTzHLtsKjMm7KYV3ung";
     const map = new mapboxgl.Map({
       container: container.id,
       style: "mapbox://styles/mapbox/dark-v9",
       center: center,
       zoom: 15
     });
-
     map.on("load", function() {
       const picURL = "https://secure.gravatar.com/avatar/aa33fb5af8232b00d58261d13ead2b87?size=60";
-      displayPerson(map, center, picURL);
+      const person = newPerson(picURL);
+      person.setLngLat(center).addTo(map);
+      loop(positions, person, map);
     });
+  });
+}
+
+function loop(positions, person, map) {
+  positions.poll().then(function(position) {
+    const newPos = ll(position);
+    console.info("center", newPos);
+    map.jumpTo({ center: newPos });
+    person.setLngLat(newPos);
+    loop(positions, person, map);
   });
 }
