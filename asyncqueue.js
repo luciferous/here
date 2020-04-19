@@ -1,7 +1,9 @@
+export const name = "asyncqueue";
+
 /**
  * An buffered FIFO queue brokered by Promises.
  */
-function asyncqueue() {
+export function asyncqueue() {
   var Polling = { promises: [] },
       Offering = { items: [] },
       Failing = { cause: null, items: [] },

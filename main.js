@@ -1,47 +1,115 @@
-function watchPosition(options) {
-  if (!navigator.geolocation) throw new Error("Geolocation not supported.");
-  const q = asyncqueue();
-  navigator.geolocation.watchPosition(q.offer, q.fail, options);
-  return q;
-}
+import { asyncqueue } from "./asyncqueue.js";
+import { mbAccessToken } from "./tokens.js";
+import { openDB } from "https://unpkg.com/idb/with-async-ittr.js?module";
 
-function ll(position) {
-  return [position.coords.longitude, position.coords.latitude];
-}
+async function heatmap(map, app) {
+  const locs = await app.getLocations();
+  const features = locs.map(function(loc) {
+    return {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Point",
+        coordinates: [loc.longitude, loc.latitude]
+      }
+    };
+  });
+  map.addSource("reports", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: features
+    }
+  });
 
-function newPerson(url) {
-  var el = document.createElement("div");
-  el.className = "person";
-  el.style.backgroundImage = "url(" + url + ")";
-  return new mapboxgl.Marker(el);
-}
-
-function main(container) {
-  mapboxgl.accessToken = "pk.eyJ1IjoibmV1bWFuIiwiYSI6ImNpcXhkaTAwNDAxZW9ma204cGp2d2RwZGIifQ.P0eiTzHLtsKjMm7KYV3ung";
-  const positions = watchPosition({ enableHighAccuracy: true });
-  positions.poll().then(function(position) {
-    const center = ll(position);
-    const map = new mapboxgl.Map({
-      container: container.id,
-      style: "mapbox://styles/mapbox/dark-v9",
-      center: center,
-      zoom: 15
-    });
-    map.on("load", function() {
-      const picURL = "https://secure.gravatar.com/avatar/aa33fb5af8232b00d58261d13ead2b87?size=60";
-      const person = newPerson(picURL);
-      person.setLngLat(center).addTo(map);
-      loop(positions, person, map);
-    });
+  map.addLayer({
+    "id": "reports",
+    "type": "heatmap",
+    "source": "reports"
   });
 }
 
-function loop(positions, person, map) {
-  positions.poll().then(function(position) {
-    const newPos = ll(position);
-    console.info("center", newPos);
-    map.jumpTo({ center: newPos });
-    person.setLngLat(newPos);
-    loop(positions, person, map);
+async function loop(positions, db, map) {
+  const position = await positions.poll();
+
+  // Add location to database.
+  await db.add("locations", {
+    timestamp: position.timestamp,
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude
   });
+
+  // Encode to OLC.
+  const olc = OpenLocationCode.encode(
+    position.coords.latitude,
+    position.coords.longitude);
+  console.debug(olc);
+
+  return loop(positions, db, map);
+}
+
+export default async function(container) {
+  console.debug("Opening Locations database.");
+  const db = await openDB("Locations", 1, {
+    upgrade(db) {
+      console.debug("Initializing Locations database.");
+      const store = db.createObjectStore("locations", { keyPath: "id", autoIncrement: true });
+      store.createIndex("timestamp", "timestamp", { unique: true });
+    }
+  });
+
+  const locations = await db.getAllFromIndex("locations", "timestamp");
+
+  const defaultCenter = [103.8476543, 1.2796634];
+
+  // Init Mapbox.
+  const map = new mapboxgl.Map({
+    accessToken: mbAccessToken(),
+    container: container.id,
+    style: "mapbox://styles/mapbox/dark-v10",
+    center: (
+      locations.length == 0 ? defaultCenter : [
+        locations[0].longitude,
+        locations[1].latitude
+      ]
+    ),
+    zoom: 15
+  });
+
+  // Disable rotation and zoom.
+  map.doubleClickZoom.disable();
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
+
+  const control = new mapboxgl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: true
+  });
+  map.addControl(control);
+
+  const positions = asyncqueue();
+  control.on("geolocate", positions.offer);
+  control.on("error", positions.fail);
+
+  const app = {
+    map: map,
+    async getLocations() {
+      return db.getAllFromIndex("locations", "timestamp");
+    }
+  };
+
+  // Load map and center.
+  map.on("load", async function() {
+
+    heatmap(map, app);
+
+    try {
+      // Main loop.
+      await loop(positions, db, map);
+    } catch(err) {
+      console.error(err);
+    }
+  });
+
+  return app;
 }
