@@ -25,7 +25,10 @@ async function heatmap(map, app) {
   map.addLayer({
     "id": "reports",
     "type": "heatmap",
-    "source": "reports"
+    "source": "reports",
+    "paint": {
+      "heatmap-opacity": 0.7
+    }
   });
 }
 
