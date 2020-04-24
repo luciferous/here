@@ -1,8 +1,8 @@
 body {margin:0; padding:0; background:#445; overflow:hidden;}
 #fixed-dimensions {position:absolute; top:0; bottom:2em; width:100%; overflow:scroll;}
-#menu {position:absolute; bottom:0; height:2em; width:100%; background:#222; color:#aaa; z-index:100; }
+#menu {position:absolute; bottom:0; height:2em; width:100%; background:#222; color:#aaa;}
 #menu ul {margin:0; padding:0; height:inherit; list-style:none; display:flex; align-items:center;}
 #menu li {flex:auto}
 #menu a {display:block; padding:.5em 1em; text-align:center; color:#aaa}
 #meta {background:#ccc; color:#223;}
-#map {position:absolute; top:0; bottom:0; width:100%; z-index:0;}
+#map {position:absolute; top:0; bottom:0; width:100%;}
