@@ -19,13 +19,15 @@ import * as fmi from "https://unpkg.com/fill-me-in";
 document.addEventListener("DOMContentLoaded", async () => {
     const app = await main(document.getElementById("map"));
     window.app = app;
-    const meta = document.querySelector("#meta");
-    const map = document.querySelector("#map");
 
     const locations = await app.getLocations();
-    const template = document.querySelector("#meta template");
+    const template = document.querySelector("#console template");
     const fragment = await fmi.render(template).withValue(locations).asFragment();
     template.parentElement.insertBefore(fragment, template);
+
+    document.querySelector("#console hr").addEventListener("click", e => {
+      e.target.parentElement.classList.toggle("expanded");
+    });
 
     document
       .querySelectorAll("nav#menu a")
@@ -39,7 +41,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 </head>
 <body>
-<div id="map" class="nav"></div>
+
+<div id="map-combo" class="nav">
+<div id="map"></div>
+<div id="console">
+  <hr>
+  <div class="content">
+    <table>
+      <thead>
+        <tr><th>Timestamp</th><th>Latitude</th><th>Longitude</th></tr>
+      </thead>
+      <tbody>
+      <template>
+        <tr>
+          <td slot="timestamp"></td>
+          <td slot="latitude"></td>
+          <td slot="longitude"></td>
+        </tr>
+      </template>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
 
 <div id="meta" class="nav" style="display:none">
   <table>
@@ -60,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 <nav id="menu">
   <ul>
-    <li><a href="#map">Map</a></li>
+    <li><a href="#map-combo">Map</a></li>
     <li><a href="#meta">Meta</a></li>
   </ul>
 </nav>

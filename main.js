@@ -4,16 +4,20 @@ import { openDB } from "https://unpkg.com/idb/with-async-ittr.js?module";
 
 async function heatmap(map, app) {
   const locs = await app.getLocations();
+
   const features = locs.map(function(loc) {
     return {
       type: "Feature",
-      properties: {},
+      properties: {
+        timestamp: loc.timestamp
+      },
       geometry: {
         type: "Point",
         coordinates: [loc.longitude, loc.latitude]
       }
     };
   });
+
   map.addSource("reports", {
     type: "geojson",
     data: {
@@ -76,7 +80,8 @@ export default async function(container) {
         locations[1].latitude
       ]
     ),
-    zoom: 15
+    zoom: 15,
+    logoPosition: "top-right"
   });
 
   // Disable rotation and zoom.
