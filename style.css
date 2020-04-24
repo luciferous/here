@@ -1,8 +1,11 @@
-body {margin:0; padding:0; background:#445; overflow:hidden;}
-#fixed-dimensions {position:absolute; top:0; bottom:2em; width:100%; overflow:scroll;}
-#menu {position:absolute; bottom:0; height:2em; width:100%; background:#222; color:#aaa;}
+:root {
+  --nav-height: 2em;
+}
+
+body {margin:0; padding:0; background:#445;}
+#menu {position:absolute; bottom:0; height:var(--nav-height); width:100%; background:#222; color:#aaa;}
 #menu ul {margin:0; padding:0; height:inherit; list-style:none; display:flex; align-items:center;}
 #menu li {flex:auto}
 #menu a {display:block; padding:.5em 1em; text-align:center; color:#aaa}
-#meta {background:#ccc; color:#223;}
-#map {position:absolute; top:0; bottom:0; width:100%;}
+#meta {position:absolute; top:0; bottom:var(--nav-height); overflow:scroll; background:#ccc; color:#223;}
+#map {position:absolute; top:0; bottom:var(--nav-height); width:100%;}
