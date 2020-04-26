@@ -80,8 +80,7 @@ export default async function(container) {
         locations[1].latitude
       ]
     ),
-    zoom: 15,
-    logoPosition: "top-right"
+    zoom: 15
   });
 
   // Disable rotation and zoom.

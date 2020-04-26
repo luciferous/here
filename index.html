@@ -25,9 +25,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const fragment = await fmi.render(template).withValue(locations).asFragment();
     template.parentElement.insertBefore(fragment, template);
 
-    document.querySelector("#console hr").addEventListener("click", e => {
-      e.target.parentElement.classList.toggle("expanded");
-    });
+    const cons = document.querySelector("#console");
+    cons.addEventListener("click", e => (e.target == cons) ? cons.classList.toggle("expanded") : 1);
 
     document
       .querySelectorAll("nav#menu a")
@@ -45,7 +44,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 <div id="map-combo" class="nav">
 <div id="map"></div>
 <div id="console">
-  <hr>
   <div class="content">
     <table>
       <thead>
