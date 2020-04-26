@@ -17,8 +17,7 @@ body {margin:0; padding:0; background:#222; font-family:"San Francisco","Helveti
 
 #map {top:0; bottom:var(--nav-height); z-index:0;}
 
-#console {bottom:var(--nav-height); height:24px; background:floralwhite; border-radius:12px 12px 0 0; box-shadow:0px -12px 8px rgba(0,0,0,.7); cursor: grab;}
+#console {bottom:var(--nav-height); height:24px; background:floralwhite; border-radius:12px 12px 0 0; box-shadow:0px -12px 8px rgba(0,0,0,.7);}
 #console.expanded {height:300px;}
-#console > * {cursor:auto}
-#console::before {display:block; width:30px; margin:13px auto; font-size:0px; content:"."; border-top:2px solid lightgray; user-select:none;}
-#console .content {height:100%; overflow-x: hidden; overflow-y:scroll;}
+#console::before {display:block; width:30px; margin:13px auto; font-size:0px; content:"."; border-top:2px solid lightgray; user-select:none; cursor:grab;}
+#console .content {height:100%; overflow:scroll;}
