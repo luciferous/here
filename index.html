@@ -25,7 +25,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     window.ContraApp = {
       getSince() { return "0"; },
-      async send(ping) {
+      async send(enc) {
+        const ping = JSON.parse(enc);
         const fragment = await fmi.render(template).withValue(ping).asFragment();
         tbody.appendChild(fragment);
       }
