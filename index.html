@@ -16,13 +16,10 @@
 import main from "./main.js";
 import * as fmi from "https://unpkg.com/fill-me-in";
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const app = await main(document.getElementById("map"));
-    window.app = app;
 
+document.addEventListener("DOMContentLoaded", async () => {
     const template = document.querySelector("#console template");
     const tbody = document.querySelector("#meta tbody");
-
     window.ContraApp = {
       getSince() { return "0"; },
       async send(enc) {
@@ -31,6 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         tbody.appendChild(fragment);
       }
     };
+
+    const app = await main(document.getElementById("map"));
+    window.app = app;
 
     const cons = document.querySelector("#console");
     cons.addEventListener("click", e => (e.target == cons) ? cons.classList.toggle("expanded") : 1);
