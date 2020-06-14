@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const template = document.querySelector("#console template");
     const tbody = document.querySelector("#meta tbody");
     window.ContraApp = {
-      getSince() { return "0"; },
+      getSince() { return 2 },
       async send(enc) {
         const ping = JSON.parse(enc);
         const fragment = await fmi.render(template).withValue(ping).asFragment();
